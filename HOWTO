@@ -1,0 +1,5 @@
+### Run
+
+python find_cafe.py
+
+Lunch history for the current week will be stored in history.json

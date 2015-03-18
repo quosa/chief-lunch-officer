@@ -1,0 +1,5 @@
+- Use proper Python logging
+- Epic: Web interface to display the recommendations for today
+- Epic: Web interface to configure preferences
+- Epic: Automatically fetch the list of available cafes in the area
+- Epic: Define the format and way how the cafes can expose their lunch information to the service

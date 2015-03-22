@@ -21,13 +21,16 @@ HIMA_SALI_URL = 'http://www.himasali.com/p/lounaslista.html'
 DYLAN_MILK_URL = 'http://dylan.fi/milk/'
 PIHKA_URL = 'http://ruoholahti.pihka.fi/en/'
 FACTORY_SALMISAARI_URL = 'http://www.ravintolafactory.com/ravintolat/helsinki-salmisaari/'
+ANTELL_URL = 'http://www.antell.fi/lounaslistat/lounaslista.html?owner=146'
 YLE_WEATHER_FORECAST_URL = 'http://yle.fi/saa/resources/ajax/saa-api/hourly-forecast.action?id=642554'
 
-def make_readable(content_with_html_tags, insert_new_lines=True):
+def make_readable(content_with_html_tags, insert_new_lines=True, collapse_whitespace=False):
     content_with_html_tags = re.sub('<br.*?>', '\n' if insert_new_lines else '', content_with_html_tags)
     content_with_html_tags = re.sub('<.*?>', '', content_with_html_tags)
     content_with_html_tags = re.sub('[ \t]+', ' ', content_with_html_tags)
     content_with_html_tags = re.sub('\n+', '\n', content_with_html_tags)
+    if collapse_whitespace:
+        content_with_html_tags = re.sub('\s+', ' ', content_with_html_tags)
     content_with_html_tags = content_with_html_tags.replace('&amp;', '&').replace('&nbsp;', '')
     return content_with_html_tags.encode('ascii', 'ignore').decode('ascii')
 
@@ -48,6 +51,10 @@ def find_menu(url, date, regex, index=0):
         return 'No menu'
     else:
         return found[index]
+
+def get_antell_menu(date):
+    weekday = date.weekday()
+    return find_menu(ANTELL_URL, date, r'<h2[^>]+>(.*?)<img', weekday)
 
 def get_hima_sali_menu(date):
     date_label = '%d\\.%d\\.' % (date.day, date.month)
@@ -118,12 +125,15 @@ today = date.today()
 #today = today + timedelta(days=2)
 print('Today %s\n' % today.strftime('%d.%m.%Y'))
 
+antell_menu = get_antell_menu(today)
+print('\nAntell:\n\n%s' % make_readable(antell_menu, collapse_whitespace=True))
+
 hima_sali_menu = get_hima_sali_menu(today)
 print('\nHima & Sali:\n\n%s' % make_readable(hima_sali_menu, insert_new_lines=False))
 dylan_milk_menu = get_dylan_milk_menu(today)
 print('\nDylan Milk:\n\n%s' % make_readable(dylan_milk_menu))
 pihka_menu = get_pihka_menu(today)
-print('\nPihka:\n\n%s' % make_readable(pihka_menu, insert_new_lines=False))
+print('\nPihka:\n\n%s' % make_readable(pihka_menu, collapse_whitespace=True))
 factory_salmisaari_menu = get_factory_salmisaari_menu(today)
 print('\nFactory Salmisaari:\n\n%s' % make_readable(factory_salmisaari_menu, insert_new_lines=False))
 

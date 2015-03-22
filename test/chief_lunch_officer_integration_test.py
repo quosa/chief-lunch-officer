@@ -1,7 +1,7 @@
 import unittest
 
 from constants import TEMPERATURE, PRECIPITATION_CHANCE, PRECIPITATION_AMOUNT, WIND
-from constants import NEPALESE, HIMA_SALI, DYLAN_MILK, SODEXO
+from constants import NEPALESE, HIMA_SALI, DYLAN_MILK, SODEXO, FACTORY_SALMISAARI
 from chief_lunch_officer import ChiefLunchOfficer, WeatherOpinion, FoodTaste
 from preferences import FOOD_PREFERENCES
 from cafes import CAFES
@@ -43,11 +43,11 @@ class ChiefLunchOfficerIntegrationTest(unittest.TestCase):
         self.clo.lunched([HIMA_SALI])
         self.assertEqual(DYLAN_MILK, self.clo.decide_one())
 
-    def test_if_meatballs_hima_sali_can_occur_twice_in_a_week(self):
-        self.cafes[HIMA_SALI]['menu'] = 'meatballs'
-        self.cafes[DYLAN_MILK]['menu'] = 'fish'
-        self.clo.lunched([HIMA_SALI])
-        self.assertEqual(HIMA_SALI, self.clo.decide_one())
+    def test_if_meatballs_dylan_milk_can_occur_twice_in_a_week(self):
+        self.cafes[DYLAN_MILK]['menu'] = 'meatballs'
+        self.cafes[FACTORY_SALMISAARI]['menu'] = 'fish'
+        self.clo.lunched([DYLAN_MILK])
+        self.assertEqual(DYLAN_MILK, self.clo.decide_one())
 
     def test_if_meatballs_hima_sali_can_occur_three_times_in_a_week(self):
         self.cafes[HIMA_SALI]['menu'] = 'meatballs'
@@ -84,12 +84,12 @@ class ChiefLunchOfficerIntegrationTest(unittest.TestCase):
         self.clo.weekday(4)
         self.assertEqual(NEPALESE, self.clo.decide_one())
 
-    def test_if_thu_then_hima_sali_even_if_lunched_2_times_there_this_week(self):
-        self.cafes[HIMA_SALI]['menu'] = 'pea soup'
+    def test_if_thu_and_pea_soup_then_factory_salmisaari_even_if_lunched_2_times_there_this_week(self):
+        self.cafes[FACTORY_SALMISAARI]['menu'] = 'pea soup'
         self.cafes[DYLAN_MILK]['menu'] = 'fish'
         self.clo.weekday(3)
-        self.clo.lunched([HIMA_SALI, HIMA_SALI])
-        self.assertEqual(HIMA_SALI, self.clo.decide_one())
+        self.clo.lunched([FACTORY_SALMISAARI, FACTORY_SALMISAARI])
+        self.assertEqual(FACTORY_SALMISAARI, self.clo.decide_one())
 
     def test_if_thu_then_not_hima_sali_if_lunched_3_times_there_this_week(self):
         self.cafes[HIMA_SALI]['menu'] = 'pea soup'
@@ -113,10 +113,15 @@ class ChiefLunchOfficerIntegrationTest(unittest.TestCase):
         self.cafes[DYLAN_MILK]['menu'] = 'meat'
         self.assertEqual(DYLAN_MILK, self.clo.decide_one())
 
-    def test_prefer_chicken_over_fish(self):
+    def test_prefer_fish_over_chicken_if_fish_at_a_better_rated_cafe(self):
         self.cafes[HIMA_SALI]['menu'] = 'chicken'
         self.cafes[DYLAN_MILK]['menu'] = 'fish'
-        self.assertEqual(HIMA_SALI, self.clo.decide_one())
+        self.assertEqual(DYLAN_MILK, self.clo.decide_one())
+
+    def test_prefer_chicken_over_fish(self):
+        self.cafes[FACTORY_SALMISAARI]['menu'] = 'chicken'
+        self.cafes[DYLAN_MILK]['menu'] = 'fish'
+        self.assertEqual(FACTORY_SALMISAARI, self.clo.decide_one())
 
     def test_prefer_fish_over_everything_remaining(self):
         self.cafes[HIMA_SALI]['menu'] = 'brocolli'

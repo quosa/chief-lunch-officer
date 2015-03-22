@@ -13,7 +13,7 @@ CAFES = {
         'address': 'Tallberginkatu 1 C',
         'menu': '',
         'distance': 1,
-        'rating': 3
+        'rating': 2.5
     },
     DYLAN_MILK: {
         'address': 'Porkkalankatu 5',

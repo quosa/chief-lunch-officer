@@ -165,6 +165,27 @@ class ChiefLunchOfficerTest(unittest.TestCase):
         self.clo.lunched(['cafe2', 'cafe3', 'cafe3', 'cafe1', 'cafe1', 'cafe1'])
         self.assertEqual(['cafe2', 'cafe3', 'cafe1'], self.clo.decide())
 
+    def test_if_all_same_choose_cafe_with_higher_rating(self):
+        self.clo.cafes({
+          'cafe1': {
+            'menu': 'food1',
+            'distance': 1,
+            'rating': 2
+          },
+          'cafe2': {
+            'menu': 'food2',
+            'distance': 1,
+            'rating': 3
+          },
+          'cafe3': {
+            'menu': 'food3',
+            'distance': 1,
+            'rating': 1
+          }
+        })
+        self.clo.lunched([])
+        self.assertEqual(['cafe2', 'cafe1', 'cafe3'], self.clo.decide())
+
     def test_if_all_same_and_some_cafe_preferred_on_this_weekday_choose_this_cafe(self):
         self.clo.weekday(4)
         self.clo.cafes({

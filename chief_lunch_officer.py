@@ -50,6 +50,7 @@ class FoodTaste:
 
 class ChiefLunchOfficer:
 
+    RATING_WEIGHT = 3
     MENU_WEIGHT = 1
     WEATHER_WEIGHT = -15
     VISITED_WEIGHT = -3
@@ -117,6 +118,10 @@ class ChiefLunchOfficer:
                 self._weekday in cafe_details['preferred_weekdays']):
                 menu_rating = menu_rating + self.PREFERRED_DAY_WEIGHT;
                 self._log('preferred weekday: + %d' % self.PREFERRED_DAY_WEIGHT)
+            if 'rating' in cafe_details:
+                score_from_rating = cafe_details['rating'] * self.RATING_WEIGHT
+                menu_rating = menu_rating + score_from_rating
+                self._log('rating: + %d' % (score_from_rating))
             self._log('overall score: %d' % menu_rating)
             cafe_score[cafe] = menu_rating
         self._log('Overall cafe scores based on the algorithm:')

@@ -146,6 +146,7 @@ clo = ChiefLunchOfficer(food_taste=food_taste, weather_opinion=weather_opinion)
 clo.lunched(current_week_cafes).weather(weather).cafes(cafes).weekday(today.weekday())
 todays_cafes = clo.decide()
 todays_cafe = todays_cafes[0]
+todays_cafe_address = CAFES[todays_cafe]['address']
 update_history(lunch_history, today, todays_cafe)
-print('\nRecommendation:\n\n %s' % todays_cafe)
+print('\nRecommendation:\n\n %s, %s' % (todays_cafe, todays_cafe_address))
 print('\nAll lunch in preferred order: %s' % ', '.join(todays_cafes))

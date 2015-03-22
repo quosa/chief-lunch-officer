@@ -1,7 +1,7 @@
 import unittest
 
 from constants import TEMPERATURE, PRECIPITATION_CHANCE, PRECIPITATION_AMOUNT, WIND
-from constants import NEPALESE, HIMA_SALI, DYLAN_MILK
+from constants import NEPALESE, HIMA_SALI, DYLAN_MILK, SODEXO
 from chief_lunch_officer import ChiefLunchOfficer, WeatherOpinion, FoodTaste
 from preferences import FOOD_PREFERENCES
 from cafes import CAFES
@@ -30,11 +30,12 @@ class ChiefLunchOfficerIntegrationTest(unittest.TestCase):
         self.clo = ChiefLunchOfficer(food_taste=self.taste, weather_opinion=self.weather_opinion)
         self.clo.cafes(self.cafes)
 
-    def test_if_bad_weather_go_to_hima_sali(self):
+    def test_if_bad_weather_go_to_hima_sali_or_sodexo(self):
         self.cafes[HIMA_SALI]['menu'] = 'green salad'
         self.cafes[DYLAN_MILK]['menu'] = 'meatballs'
         self.weather_opinion.weather(self.BAD_WEATHER)
-        self.assertEqual(HIMA_SALI, self.clo.decide_one())
+        clo_choice = self.clo.decide_one()
+        self.assertEqual(True, HIMA_SALI == clo_choice or SODEXO == clo_choice)
 
     def test_if_one_cafe_one_day_another_next_day(self):
         self.cafes[HIMA_SALI]['menu'] = 'meatballs'

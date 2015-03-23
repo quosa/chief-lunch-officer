@@ -1,4 +1,4 @@
-from constants import NEPALESE, HIMA_SALI, DYLAN_MILK, FACTORY_SALMISAARI, PIHKA, ANTELL, POIJU, THAI, ASIAN, SODEXO
+from constants import NEPALESE, HIMA_SALI, DYLAN_MILK, FACTORY_SALMISAARI, PIHKA, ANTELL, POIJU, THAI, ASIAN, SODEXO_ACQUA, SODEXO_EXPLORER
 
 CAFES = {
     NEPALESE: {
@@ -60,7 +60,14 @@ CAFES = {
         'once_per_week': True,
         'rating': 3
     },
-    SODEXO: {
+    SODEXO_ACQUA: {
+        'address': 'Tammasaarenkatu 1-5',
+        'menu': '',
+        'distance': 1,
+        'once_per_week': True,
+        'rating': 1
+    },
+    SODEXO_EXPLORER: {
         'address': 'Tammasaarenkatu 1-5',
         'menu': '',
         'distance': 1,

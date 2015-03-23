@@ -6,7 +6,7 @@
 
 from chief_lunch_officer import ChiefLunchOfficer, WeatherOpinion, FoodTaste
 from constants import TEMPERATURE, PRECIPITATION_CHANCE, PRECIPITATION_AMOUNT, WIND
-from constants import NEPALESE, HIMA_SALI, DYLAN_MILK, FACTORY_SALMISAARI, PIHKA
+from constants import NEPALESE, HIMA_SALI, DYLAN_MILK, FACTORY_SALMISAARI, PIHKA, ANTELL, SODEXO_ACQUA, SODEXO_EXPLORER
 from preferences import FOOD_PREFERENCES
 from cafes import CAFES
 
@@ -23,6 +23,8 @@ PIHKA_URL = 'http://ruoholahti.pihka.fi/en/'
 FACTORY_SALMISAARI_URL = 'http://www.ravintolafactory.com/ravintolat/helsinki-salmisaari/'
 ANTELL_URL = 'http://www.antell.fi/lounaslistat/lounaslista.html?owner=146'
 YLE_WEATHER_FORECAST_URL = 'http://yle.fi/saa/resources/ajax/saa-api/hourly-forecast.action?id=642554'
+SODEXO_ACQUA_URL = 'http://www.sodexo.fi/carte/load/html/30/%s/day'
+SODEXO_EXPLORER_URL = 'http://www.sodexo.fi/carte/load/html/31/%s/day'
 
 def make_readable(content_with_html_tags, insert_new_lines=True, collapse_whitespace=False):
     content_with_html_tags = re.sub('<br.*?>', '\n' if insert_new_lines else '', content_with_html_tags)
@@ -31,12 +33,14 @@ def make_readable(content_with_html_tags, insert_new_lines=True, collapse_whites
     content_with_html_tags = re.sub('\n+', '\n', content_with_html_tags)
     if collapse_whitespace:
         content_with_html_tags = re.sub('\s+', ' ', content_with_html_tags)
+        content_with_html_tags = re.sub("(.{80})", "\\1\n", content_with_html_tags, 0, re.DOTALL)
     content_with_html_tags = content_with_html_tags.replace('&amp;', '&').replace('&nbsp;', '')
     return content_with_html_tags.encode('ascii', 'ignore').decode('ascii')
 
 def get(url):
     response = urllib.request.urlopen(url)
-    return response.read().decode(response.headers.get_content_charset())
+    charset = response.headers.get_content_charset() if response.headers.get_content_charset() is not None else 'utf-8'
+    return response.read().decode(charset)
 
 def get_and_find_all(url, regex):
     html = get(url)
@@ -51,6 +55,18 @@ def find_menu(url, date, regex, index=0):
         return 'No menu'
     else:
         return found[index]
+
+def get_sodexo_explorer_menu(date):
+    menu_url = SODEXO_EXPLORER_URL % (date.strftime('%Y-%m-%d'))
+    menu = find_menu(menu_url, date, '(.*)')
+    menu = json.loads(menu)['foods']
+    return menu
+
+def get_sodexo_acqua_menu(date):
+    menu_url = SODEXO_ACQUA_URL % (date.strftime('%Y-%m-%d'))
+    menu = find_menu(menu_url, date, '(.*)')
+    menu = json.loads(menu)['foods']
+    return menu
 
 def get_antell_menu(date):
     weekday = date.weekday()
@@ -125,9 +141,12 @@ today = date.today()
 #today = today + timedelta(days=2)
 print('Today %s\n' % today.strftime('%d.%m.%Y'))
 
+sodexo_acqua_menu = get_sodexo_acqua_menu(today)
+print('\nSodexo Acqua:\n\n%s' % make_readable(sodexo_acqua_menu, collapse_whitespace=True))
+sodexo_explorer_menu = get_sodexo_explorer_menu(today)
+print('\nSodexo Explorer:\n\n%s' % make_readable(sodexo_explorer_menu, collapse_whitespace=True))
 antell_menu = get_antell_menu(today)
 print('\nAntell:\n\n%s' % make_readable(antell_menu, collapse_whitespace=True))
-
 hima_sali_menu = get_hima_sali_menu(today)
 print('\nHima & Sali:\n\n%s' % make_readable(hima_sali_menu, insert_new_lines=False))
 dylan_milk_menu = get_dylan_milk_menu(today)
@@ -145,6 +164,9 @@ current_week_cafes = ordered_cafes(lunch_history)
 print('\nLunch history for current week:\n\n %s' % ', '.join(current_week_cafes))
 
 cafes = deepcopy(CAFES)
+cafes[SODEXO_EXPLORER]['menu'] = sodexo_explorer_menu
+cafes[SODEXO_ACQUA]['menu'] = sodexo_acqua_menu
+cafes[ANTELL]['menu'] = antell_menu
 cafes[HIMA_SALI]['menu'] = hima_sali_menu
 cafes[DYLAN_MILK]['menu'] = dylan_milk_menu
 cafes[PIHKA]['menu'] = pihka_menu
@@ -159,4 +181,5 @@ todays_cafe = todays_cafes[0]
 todays_cafe_address = CAFES[todays_cafe]['address']
 update_history(lunch_history, today, todays_cafe)
 print('\nRecommendation:\n\n %s, %s' % (todays_cafe, todays_cafe_address))
-print('\nAll lunch in preferred order: %s' % ', '.join(todays_cafes))
+formatted_cafes = ', '.join(todays_cafes[0:5]) + '\n' + ', '.join(todays_cafes[5:-1])
+print('\nAll lunch in preferred order:\n\n %s' % (formatted_cafes))

@@ -9,6 +9,7 @@ from constants import TEMPERATURE, PRECIPITATION_CHANCE, PRECIPITATION_AMOUNT, W
 from constants import NEPALESE, HIMA_SALI, DYLAN_MILK, FACTORY_SALMISAARI, PIHKA, ANTELL, SODEXO_ACQUA, SODEXO_EXPLORER
 from preferences import FOOD_PREFERENCES
 from cafes import CAFES
+from decorators import get_ignore_errors_decorator
 
 from pathlib import Path
 from datetime import date, datetime, timedelta
@@ -16,6 +17,8 @@ from copy import deepcopy
 import urllib.request
 import json
 import re
+
+EmptyMenuOnError = get_ignore_errors_decorator(default_value='No menu. Data feed format for the cafe changed?')
 
 HIMA_SALI_URL = 'http://www.himasali.com/p/lounaslista.html'
 DYLAN_MILK_URL = 'http://dylan.fi/milk/'
@@ -56,34 +59,41 @@ def find_menu(url, date, regex, index=0):
     else:
         return found[index]
 
+@EmptyMenuOnError
 def get_sodexo_explorer_menu(date):
     menu_url = SODEXO_EXPLORER_URL % (date.strftime('%Y-%m-%d'))
     menu = find_menu(menu_url, date, '(.*)')
     menu = json.loads(menu)['foods']
     return menu
 
+@EmptyMenuOnError
 def get_sodexo_acqua_menu(date):
     menu_url = SODEXO_ACQUA_URL % (date.strftime('%Y-%m-%d'))
     menu = find_menu(menu_url, date, '(.*)')
     menu = json.loads(menu)['foods']
     return menu
 
+@EmptyMenuOnError
 def get_antell_menu(date):
     weekday = date.weekday()
     return find_menu(ANTELL_URL, date, r'<h2[^>]+>(.*?)<img', weekday)
 
+@EmptyMenuOnError
 def get_hima_sali_menu(date):
     date_label = '%d\\.%d\\.' % (date.day, date.month)
     return find_menu(HIMA_SALI_URL, date, r'%s(.*?Wok.*?[\d\.]+)' % (date_label), -1)
 
+@EmptyMenuOnError
 def get_dylan_milk_menu(date):
     return find_menu(DYLAN_MILK_URL, date, r'<div class="fbf_desc">(.*?)</div>')
 
+@EmptyMenuOnError
 def get_pihka_menu(date):
     weekday = date.weekday()
     found = get_and_find_all(PIHKA_URL, r'<div class="menu\-day.*?<ul>(.*?)</div>')
     return found[weekday]
 
+@EmptyMenuOnError
 def get_factory_salmisaari_menu(date):
     date_label = date.strftime('%d.%m.%Y')
     found = get_and_find_all(FACTORY_SALMISAARI_URL, r'%s</h3>(.*?)</p>' % (date_label))

@@ -85,7 +85,7 @@ def get_pihka_menu(date):
     return found[weekday]
 
 def get_factory_salmisaari_menu(date):
-    date_label = '%d\\.%d\\.%d' % (date.day, date.month, date.year)
+    date_label = date.strftime('%d.%m.%Y')
     found = get_and_find_all(FACTORY_SALMISAARI_URL, r'%s</h3>(.*?)</p>' % (date_label))
     return found[0]
 
